@@ -2,67 +2,77 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 
 	"github.com/gocolly/colly"
 )
 
-type Item struct {
-	Name        string `json:"name"`
-	Price       string `json:"price"`
-	Description string `json:"description"`
-	ImageUrl    string `json:"imgurl"`
-	Reviews     string `json:"reviews"`
+type Config struct {
+	URL                string            `json:"url"`
+	ContainerSelector  string            `json:"container-selector"`
+	PaginationSelector string            `json:"pagination-selector"`
+	AllowPagination    bool              `json:"allow-pagination"`
+	Selectors          map[string]string `json:"selectors"`
 }
 
 func main() {
-	// Instantiate default collector
-	c := colly.NewCollector(
-		colly.AllowedDomains("webscraper.io"),
-	)
 
-	var items []Item
+	configFile := flag.String("config", "config.json", "./")
+	flag.Parse()
 
-	c.OnHTML("div.product-wrapper.card-body", func(h *colly.HTMLElement) {
-		item := getItemsFromWeb(h)
+	file, err := os.ReadFile(*configFile)
+	if err != nil {
+		fmt.Println("Error reading config file:", err)
+		return
+	}
+
+	var config Config
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		fmt.Println("Error parsing config file:", err)
+		return
+	}
+
+	c := colly.NewCollector()
+
+	var items []map[string]string
+
+	c.OnHTML(config.ContainerSelector, func(h *colly.HTMLElement) {
+		item := make(map[string]string)
+		for key, selector := range config.Selectors {
+			if key == "imgurl" {
+				item[key] = h.ChildAttr(selector, "src")
+			} else {
+				item[key] = h.ChildText(selector)
+			}
+		}
 		items = append(items, item)
 	})
 
-	c.OnHTML("a[rel=next]", func(h *colly.HTMLElement) {
-		next_page := h.Request.AbsoluteURL(h.Attr("href"))
-		c.Visit(next_page)
-	})
+	if config.AllowPagination {
+		c.OnHTML(config.PaginationSelector, func(h *colly.HTMLElement) {
+			nextPage := h.Request.AbsoluteURL(h.Attr("href"))
+			c.Visit(nextPage)
+		})
+	}
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(r.URL.String())
+		fmt.Println("Visiting:", r.URL.String())
 	})
 
-	c.Visit("https://webscraper.io/test-sites/e-commerce/static/computers/laptops")
+	c.Visit(config.URL)
 
 	content, err := json.Marshal(items)
-
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Error marshalling JSON:", err)
+		return
 	}
 
-	os.WriteFile("products.json", content, 0664)
-}
-
-func getItemsFromWeb(h *colly.HTMLElement) Item {
-	Name := h.ChildText("h4 > a.title")
-	Price := h.ChildText("h4.price")
-	Description := h.ChildText("p.description")
-	ImageUrl := h.ChildAttr("img", "src")
-	Reviews := h.ChildText("p.review-count")
-
-	item := Item{
-		Name:        Name,
-		Price:       Price,
-		Description: Description,
-		ImageUrl:    ImageUrl,
-		Reviews:     Reviews,
+	err = os.WriteFile("products.json", content, 0664)
+	if err != nil {
+		fmt.Println("Error writing JSON file:", err)
+		return
 	}
-
-	return item
 }

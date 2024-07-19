@@ -1,0 +1,13 @@
+{
+  "url": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
+  "container-selector": "div.product-wrapper.card-body",
+  "pagination-selector": "a[rel=next]",
+  "selectors": {
+    "name": "h4 > a.title",
+    "price": "h4.price",
+    "description": "p.description",
+    "imgurl": "img",
+    "reviews": "p.review-count"
+  },
+  "allow-pagination": true
+}
