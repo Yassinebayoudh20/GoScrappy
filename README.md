@@ -18,13 +18,13 @@ A simple web scraper written in Go that uses the `colly` library for web scrapin
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/your-repository.git
+    git clone https://github.com/yassinebayoudh20/GoScrappy.git
     ```
 
 2. Navigate to the project directory:
 
     ```bash
-    cd your-repository
+    cd your-folder
     ```
 
 3. Install dependencies:
