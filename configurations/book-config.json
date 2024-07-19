@@ -1,0 +1,13 @@
+{
+  "url": "https://books.toscrape.com/",
+  "container-selector": "article.product_pod",
+  "pagination-selector": "li.next a",
+  "selectors": {
+    "name": "h3 > a",
+    "price": "div.product_price > p.price_color",
+    "availability": "p.instock.availability",
+    "imgurl": "div.image_container img"
+  },
+  "allow-pagination": true,
+  "output": "./outputs/books.json"
+}

@@ -1,0 +1,11 @@
+{
+  "url": "https://quotes.toscrape.com/",
+  "container-selector": "div.quote",
+  "pagination-selector": "nav > ul.pager > li.next > a",
+  "selectors": {
+    "text": "span.text",
+    "author": "span > small.author"
+  },
+  "allow-pagination": true,
+  "output": "./outputs/quotes.json"
+}

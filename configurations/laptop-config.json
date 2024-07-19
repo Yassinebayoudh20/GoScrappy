@@ -9,5 +9,6 @@
     "imgurl": "img",
     "reviews": "p.review-count"
   },
-  "allow-pagination": true
+  "allow-pagination": true,
+  "output": "./outputs/laptops.json"
 }

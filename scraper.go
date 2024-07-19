@@ -13,16 +13,26 @@ type Config struct {
 	URL                string            `json:"url"`
 	ContainerSelector  string            `json:"container-selector"`
 	PaginationSelector string            `json:"pagination-selector"`
+	Output             string            `json:"output"`
 	AllowPagination    bool              `json:"allow-pagination"`
 	Selectors          map[string]string `json:"selectors"`
 }
 
 func main() {
 
-	configFile := flag.String("config", "config.json", "./")
+	configName := flag.String("config", "", "Configuration name you want to scrap")
 	flag.Parse()
 
-	file, err := os.ReadFile(*configFile)
+	if *configName == "" {
+		fmt.Println("Please provide a configuration name")
+		flag.Usage()
+		return
+	}
+
+	configFile := "./configurations/" + *configName + ".json"
+	flag.Parse()
+
+	file, err := os.ReadFile(configFile)
 	if err != nil {
 		fmt.Println("Error reading config file:", err)
 		return
@@ -70,7 +80,7 @@ func main() {
 		return
 	}
 
-	err = os.WriteFile("products.json", content, 0664)
+	err = os.WriteFile(config.Output, content, 0664)
 	if err != nil {
 		fmt.Println("Error writing JSON file:", err)
 		return
